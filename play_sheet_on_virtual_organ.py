@@ -15,8 +15,8 @@ import fluidsynth
 # ----------------------------------------------------------------------
 # 1️⃣  Configuration
 # ----------------------------------------------------------------------
-SCORE_FILE = "score.xml"                # <-- change to your file
-SOUND_FONT = "organ.sf2"                # <-- path to an organ soundfont
+SCORE_FILE = "469.mxl"                # <-- change to your file
+SOUND_FONT = "Organteq_Church_Organ.sf2"                # <-- path to an organ soundfont
 ORGAN_PROGRAM = 1                       # GM program number for a pipe organ
 TEMPO_BPM = None                         # If None, read from the score
 
@@ -25,7 +25,7 @@ TEMPO_BPM = None                         # If None, read from the score
 # ----------------------------------------------------------------------
 try:
     fs = fluidsynth.Synth()
-    fs.start(driver="alsa")  # On Windows use "dsound", on macOS use "coreaudio"
+    fs.start(driver="dsound")  # On Windows use "dsound", on macOS use "coreaudio"
     sfid = fs.sfload(SOUND_FONT)
     if sfid == -1:
         raise RuntimeError(f"Could not load soundfont '{SOUND_FONT}'")
@@ -50,8 +50,11 @@ if TEMPO_BPM is not None:
     bpm = TEMPO_BPM
 else:
     # Pull the first MetronomeMark from the file; fall back to 120 if absent
-    met_mark = score.metronomeMarkBoundaries
-    bpm = met_mark[0].number if met_mark else 120
+    met_mark = score.metronomeMarkBoundaries()
+    # print(met_mark)
+    # print(dir(met_mark[0][2]))
+    # print(met_mark[0][2].getQuarterBPM())
+    bpm = met_mark[0][2].getQuarterBPM() if met_mark else 120
 
 print(f"[+] Score parsed – tempo set to {bpm} BPM")
 
@@ -65,6 +68,8 @@ def play_element(el, time_offset):
     time_offset: how many seconds to wait *before* this element starts
     """
     # Wait until the start time of this element
+    print(time_offset)
+    print(el)
     time.sleep(time_offset)
 
     if isinstance(el, note.Note):
